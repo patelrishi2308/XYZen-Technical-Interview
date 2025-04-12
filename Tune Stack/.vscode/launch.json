@@ -1,0 +1,39 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "TuneStack Dev",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "-t",
+                "lib/config/flavours/dev/dev.dart",
+                "--flavor",
+                "dev"
+            ]
+        },
+        {
+            "name": "TuneStack",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "-t",
+                "lib/config/flavours/prod/prod.dart",
+                "--flavor",
+                "prod"
+            ]
+        },
+        {
+            "name": "TuneStack profile",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "args": [
+                "-t",
+                "lib/config/flavours/prod/prod.dart",
+                "--flavor",
+                "prod"
+            ]
+        },
+    ]
+}

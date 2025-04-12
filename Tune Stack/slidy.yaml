@@ -1,0 +1,105 @@
+slidy: '1'
+variables:
+  customMessage: "Complete"    # Gets  ${Local.var.customMessage}
+
+scripts:
+  #* Clean up project (slidy run doctor)
+  doctor: flutter doctor
+
+  #* Clean up project (slidy run cleanProject)
+  cleanProject:
+    description: "Clean | Get Packages | import Sorter | dart info | flutter formate | dart analyze | dart fix |"
+    steps:
+      - name: "Clean"
+        description : "Flutter clean"
+        run: flutter clean
+
+      - name: "Get Packages"
+        description: "gets all the dependencies"
+        run: flutter pub get
+
+      - name: "import sorter"
+        description: "organize your dart imports"
+        run: flutter pub run import_sorter:main
+
+      - name: "dart info"
+        description: "Dart processes, and project information"
+        run: dart info
+
+      - name: "flutter formate"
+        description: "Formate Flutter Code"
+        run: dart format .
+      
+      - name: "dart fix --dry-run"
+        description: "see suggested issues"
+        run:  dart fix --dry-run
+
+      - name: "dart fix --apply"
+        description: "Fix all problems"
+        run:  dart fix --apply
+
+      - name: "dart analyze"
+        description: "Analysis issues identified."
+        run: dart analyze  
+  
+  #* iOS clean up project (slidy run cleanupIos)
+  cleanupIos:
+    description: "cleanup iOS project"
+    steps:
+      - name: "Clean"
+        run: slidy run cleanProject
+
+      - name: "PodClean"
+        description: "Execute pod clean"
+        shell: bash   # default: command. options (command|bash|sh|zsh|pwsh)
+        condition: "${System.operatingSystem} == macos"
+        working-directory: ios
+        run: |-
+          rm Podfile.lock
+          pod deintegrate
+          pod update
+          pod install
+
+      - run: echo ${Local.var.customMessage}
+
+  #* Prod APK command (slidy run buildAndroidProd)   
+  buildAndroidProd:
+    description: "Build Production apk"
+    steps:
+      - name: "Slidy Clean"
+        run: slidy run cleanProject
+    
+      - name: "Build Prod apk"
+        run: flutter build apk --flavor prod -t lib/config/flavours/prod/prod.dart
+
+  #* Dev APK command (slidy run buildAndroidDev)   
+  buildAndroidDev:
+    description: "Build Development apk"
+    steps:
+      - name: "Slidy Clean"
+        run: slidy run cleanProject
+
+      - name: "Build Dev apk"
+        run: flutter build apk --flavor dev -t lib/config/flavours/dev/dev.dart
+
+  #* Prod IPA command (slidy run buildiOSProd)   
+  buildiOSProd:
+    description: "Build Production ipa"
+    steps:
+      - name: "Slidy iOS Clean"
+        run: slidy run cleanupIos
+    
+      - name: "Build Prod ipa"
+        run: flutter build ipa --flavor prod -t lib/config/flavours/prod/prod.dart
+
+  #* Dev IPA command (slidy run buildiOSDev)      
+  buildiOSDev:
+    description: "Build Development ipa"
+    steps:
+      - name: "Slidy iOS Clean"
+        run: slidy run cleanupIos
+
+      - name: "Build Dev ipa"
+        run: flutter build ipa --flavor dev -t lib/config/flavours/dev/dev.dart
+
+  
