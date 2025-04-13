@@ -35,18 +35,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
   File? _selectedImage;
   File? _selectedMusic;
+  String? _selectedFileType;
   String? _musicFileName;
   String? _musicFileSize;
-  final List<String> _categories = [
-    'Pop',
-    'Rock',
-    'Hip Hop',
-    'Jazz',
-    'Classical',
-    'Electronic',
-    'R&B',
-    'Country',
-  ];
 
   @override
   void initState() {
@@ -87,13 +78,27 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     // Request audio permission first
     await AppUtils.audioPermission(
       onGrantedCallback: () async {
-        final result = await FilePicker.platform.pickFiles(
+        /*final result = await FilePicker.platform.pickFiles(
           type: FileType.audio,
+        );*/
+        final result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: [
+            'mp3',
+            'wav',
+            'm4a',
+            'aac',
+            'mp4',
+            'mov',
+            'avi',
+            'mkv',
+          ],
         );
 
         if (result != null) {
           setState(() {
             _selectedMusic = File(result.files.single.path!);
+            _selectedFileType = AppUtils.fileType(result.files.single.path!);
             _musicFileName = result.files.single.name;
 
             // Calculate file size in MB
@@ -107,54 +112,9 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     );
   }
 
-  void _showCategoryPicker() {
-    showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppConst.k16)),
-      ),
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(AppConst.k16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Select Category',
-                style: AppStyles.getMediumStyle(
-                  fontSize: AppConst.k16,
-                  color: AppColors.primaryText,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              AppConst.gap16,
-              Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _categories.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(_categories[index]),
-                      onTap: () {
-                        setState(() {
-                          _categoryController.text = _categories[index];
-                        });
-                        Navigator.pop(context);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> _submitPost(
     CreatePostStateNotifier? createPostStateNotifier,
+    String? userName,
   ) async {
     if (_formKey.currentState!.validate() && _validateFiles()) {
       if (_selectedImage == null) {
@@ -171,10 +131,12 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             final createPost = await createPostStateNotifier?.createPost(
               coverImageURL,
               _titleController.text,
-              _categoryController.text,
+              _categoryController.text.toLowerCase().trim(),
               _descriptionController.text,
               audioFileURL,
               userId,
+              userName ?? '',
+              _selectedFileType ?? '',
             );
             if (createPost == 'success') {
               AppToastHelper.showSuccess('Post created successfully!');
@@ -216,6 +178,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userModel = ref.read(homeStateNotifierProvider).userModel;
     final createPostState = ref.watch(createPostStateNotifierProvider);
     final createPostStateNotifier = ref.read(createPostStateNotifierProvider.notifier);
     return Scaffold(
@@ -270,16 +233,10 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       AppConst.gap8,
                       AppTextField(
                         controller: _categoryController,
-                        hintText: 'Select category',
-                        readOnly: true,
-                        onTap: _showCategoryPicker,
-                        suffixIcon: const Icon(
-                          Icons.arrow_drop_down,
-                          color: AppColors.primary,
-                        ),
+                        hintText: 'Enter category',
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Please select a category';
+                            return 'Please enter a category';
                           }
                           return null;
                         },
@@ -318,7 +275,10 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                       AppButton(
                         title: 'Create Post',
                         onPressed: () async {
-                          await _submitPost(createPostStateNotifier).then((_) {
+                          await _submitPost(
+                            createPostStateNotifier,
+                            userModel?.userName,
+                          ).then((_) {
                             ref.read(homeStateNotifierProvider.notifier).getAllPosts();
                             ref.read(profileStateNotifierProvider.notifier).getAllPostsByUser(
                                   SharedPreferenceHelper.getString(
@@ -404,7 +364,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Music File',
+          'Select File',
           style: AppStyles.getMediumStyle(
             fontSize: AppConst.k14,
             color: AppColors.primaryText,
@@ -461,7 +421,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                           ],
                         )
                       : Text(
-                          'Tap to select music file',
+                          'Tap to select file',
                           style: AppStyles.getRegularStyle(
                             fontSize: AppConst.k14,
                             color: AppColors.secondaryText,

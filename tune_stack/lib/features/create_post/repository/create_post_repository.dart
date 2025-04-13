@@ -17,6 +17,8 @@ abstract interface class ICreatePostRepository {
     String description,
     String audioUrl,
     String uId,
+    String userName,
+    String fileType,
   );
 }
 
@@ -60,6 +62,8 @@ class CreatePostRepository implements ICreatePostRepository {
     String description,
     String audioUrl,
     String uId,
+    String userName,
+    String fileType,
   ) async {
     try {
       final postRef = _firestore.collection('posts').doc();
@@ -73,6 +77,9 @@ class CreatePostRepository implements ICreatePostRepository {
         'audioUrl': audioUrl,
         'userId': uId,
         'createdAt': DateTime.now().millisecondsSinceEpoch,
+        'userName': userName,
+        'visibility': 'public',
+        'fileType': fileType,
       });
       return 'success';
     } catch (e) {

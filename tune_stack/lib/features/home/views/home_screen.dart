@@ -8,9 +8,11 @@ import 'package:tune_stack/constants/app_dimensions.dart';
 import 'package:tune_stack/features/common/debouncer.dart';
 import 'package:tune_stack/features/home/controllers/home_state_notifier.dart';
 import 'package:tune_stack/features/home/views/music_player_screen.dart';
+import 'package:tune_stack/features/home/views/video_player_screen.dart';
 import 'package:tune_stack/features/home/views/view_all_comment_screen.dart';
 import 'package:tune_stack/features/home/views/widgets/add_comment_bottom_sheet.dart';
 import 'package:tune_stack/features/home/views/widgets/list_item_widget.dart';
+import 'package:tune_stack/features/profile/views/profile_screen.dart';
 import 'package:tune_stack/widgets/app_loading_place_holder.dart';
 import 'package:tune_stack/widgets/back_arrow_app_bar.dart';
 import 'package:tune_stack/widgets/no_data_found_widget.dart';
@@ -41,7 +43,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final homeState = ref.watch(homeStateNotifierProvider);
     final homeStateNotifier = ref.watch(homeStateNotifierProvider.notifier);
-
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       appBar: const BackArrowAppBar(
@@ -67,11 +68,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               onClearTap: () async {
                 _searchController.text = '';
                 searchFocusNode.unfocus();
+                homeStateNotifier.searchText('');
                 //! Call Function to reset the search
               },
               onChanged: (value) {
                 debouncer.run(() {
                   //! Call Function to search
+                  homeStateNotifier.searchText(value);
                 });
               },
             ),
@@ -88,13 +91,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           children: [
                             Expanded(
                               child: ListView.separated(
+                                key: const PageStorageKey<String>('home_post_list'),
                                 separatorBuilder: (context, index) => AppConst.gap12,
                                 padding: const EdgeInsets.only(bottom: AppConst.k16),
                                 itemCount: homeState.getAllPostsList.length,
                                 itemBuilder: (context, index) {
                                   final post = homeState.getAllPostsList[index];
                                   return TuneStackListItem(
-                                    posterName: post.userId ?? '',
+                                    posterName: post.userName ?? '',
                                     category: post.category ?? '',
                                     imageUrl: post.coverImageUrl ?? '',
                                     // Placeholder for demo
@@ -108,7 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       homeStateNotifier.toggleLike(getAllPosts.postId, index);
                                     },
                                     onCommentTap: () {
-                                      homeStateNotifier.getAllComments(post.postId);
+                                      homeStateNotifier.getAllComments(post.postId, showLoader: false);
                                       AddCommentBottomSheet.show(
                                         postId: post.postId ?? '',
                                         getAllPosts: post,
@@ -121,20 +125,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       );
                                     },
                                     onProfileTap: () {
-                                      // Handle profile tap
+                                      NavigationHelper.navigatePush(
+                                        route: ProfileScreen(
+                                          userId: post.userId,
+                                        ),
+                                      );
                                     },
                                     onShareTap: () {
                                       // Handle share action
                                     },
-                                    onTap: () {
-                                      NavigationHelper.navigatePush(
-                                        route: MusicPlayerScreen(
-                                          musicUrl: post.audioUrl ?? '',
-                                          title: post.category ?? 'Unknown Track',
-                                          artist: post.userId ?? 'Unknown Artist',
-                                          coverImageUrl: post.coverImageUrl ?? '',
-                                        ),
-                                      );
+                                    onTap: () async {
+                                      if (post.fileType == 'Audio') {
+                                        await NavigationHelper.navigatePush(
+                                          route: MusicPlayerScreen(
+                                            musicUrl: post.audioUrl ?? '',
+                                            title: post.category ?? 'Unknown Track',
+                                            artist: post.userName ?? 'Unknown Artist',
+                                            coverImageUrl: post.coverImageUrl ?? '',
+                                          ),
+                                        );
+                                      } else {
+                                        await NavigationHelper.navigatePush(
+                                          route: VideoPlayerScreen(
+                                            videoUrl: post.audioUrl ?? '',
+                                          ),
+                                        );
+                                      }
                                     },
                                   );
                                 },

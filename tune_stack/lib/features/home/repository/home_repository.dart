@@ -22,7 +22,7 @@ class HomeRepository implements IHomeRepository {
       // Return the data and add userId
       return snapshot.docs.map((doc) {
         final data = doc.data()! as Map<String, dynamic>;
-        data['userId'] = doc.id;
+        /*data['userId'] = doc.id;*/
         return data;
       }).toList();
     } catch (e) {

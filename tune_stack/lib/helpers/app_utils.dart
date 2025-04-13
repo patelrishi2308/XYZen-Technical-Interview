@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:master_utility/master_utility.dart';
+import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart' as handler;
 import 'package:tune_stack/config/assets/colors.gen.dart';
@@ -15,6 +16,7 @@ class AppUtils {
   AppUtils._();
 
   static bool _isRequestingPermission = false;
+
   static Future<void> mediaPermission({
     void Function()? onGrantedCallback,
     bool isCamera = false,
@@ -172,7 +174,9 @@ class AppUtils {
             })
             .onGrantedCallback(onGrantedCallback)
             .onPermanentlyDeniedCallback(() async {
-              LogHelper.logWarning('Media library permission permanently denied');
+              LogHelper.logWarning(
+                'Media library permission permanently denied',
+              );
               await handler.openAppSettings();
             })
             .onProvisionalCallback(() {
@@ -201,7 +205,9 @@ class AppUtils {
     );
   }
 
-  static Future<void> checkKeyboardVisibility(ScrollController? controller) async {
+  static Future<void> checkKeyboardVisibility(
+    ScrollController? controller,
+  ) async {
     final hasClients = controller?.hasClients ?? false;
     if (!hasClients) {
       return;
@@ -226,5 +232,19 @@ class AppUtils {
 
   static String getExtensionFromPath(String path) {
     return p.extension(path).replaceFirst('.', '');
+  }
+
+  static String fileType(String path) {
+    final mimeType = lookupMimeType(path);
+
+    if (mimeType != null) {
+      if (mimeType.startsWith('audio/')) {
+        return 'Audio';
+      } else if (mimeType.startsWith('video/')) {
+        return 'Video';
+      }
+    }
+
+    return '';
   }
 }

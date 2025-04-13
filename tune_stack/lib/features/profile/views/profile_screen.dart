@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:master_utility/master_utility.dart';
 import 'package:tune_stack/config/assets/colors.gen.dart';
 import 'package:tune_stack/constants/app_dimensions.dart';
 import 'package:tune_stack/constants/app_strings.dart';
 import 'package:tune_stack/constants/app_styles.dart';
-import 'package:tune_stack/features/common/user_model.dart';
-import 'package:tune_stack/features/home/controllers/home_state.dart';
 import 'package:tune_stack/features/home/controllers/home_state_notifier.dart';
+import 'package:tune_stack/features/home/model/get_all_posts.dart';
+import 'package:tune_stack/features/home/views/music_player_screen.dart';
+import 'package:tune_stack/features/home/views/video_player_screen.dart';
 import 'package:tune_stack/features/profile/controllers/profile_state.dart';
 import 'package:tune_stack/features/profile/controllers/profile_state_notifier.dart';
 import 'package:tune_stack/helpers/preference_helper.dart';
+import 'package:tune_stack/widgets/app_loading_place_holder.dart';
 import 'package:tune_stack/widgets/back_arrow_app_bar.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({this.userId, super.key});
+
+  final String? userId;
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -22,34 +27,21 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  /*List<GetAllPosts>? getAllPostByUser = [];
-  Map<String, List<GetAllPosts>> groupedByCategory = {};*/
-  ProfileStateNotifier? profileStateNotifier;
-  ProfileState? createPostState;
-  HomeStateNotifier? homeStateNotifier;
-  HomeState? homeState;
-  UserModel? userModel;
-
   @override
   void initState() {
     super.initState();
-
     _tabController = TabController(length: 2, vsync: this);
-    /*profileStateNotifier = ref.read(profileStateNotifierProvider.notifier);
-    createPostState = ref.watch(profileStateNotifierProvider);*/
-
-    WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) {
-        _getAllPostByUser();
-      },
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (widget.userId != null) {
+        await ref.read(profileStateNotifierProvider.notifier).getUserByUserId(widget.userId!);
+      }
+      await _getAllPostByUser();
+    });
   }
 
   Future<void> _getAllPostByUser() async {
     final userId = SharedPreferenceHelper.getString(AppStrings.userID);
-    await profileStateNotifier?.getAllPostsByUser(userId);
-    /*profileStateNotifier?.groupPostsByCategory() ?? {};*/
-    /*setState(() {});*/
+    await ref.read(profileStateNotifierProvider.notifier).getAllPostsByUser(widget.userId ?? userId);
   }
 
   @override
@@ -60,93 +52,103 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
-    final userModel = ref.read(homeStateNotifierProvider).userModel;
-    homeStateNotifier = ref.watch(homeStateNotifierProvider.notifier);
-    homeState = ref.watch(homeStateNotifierProvider);
-    profileStateNotifier = ref.watch(profileStateNotifierProvider.notifier);
-    createPostState = ref.watch(profileStateNotifierProvider);
-
+    final homeState = ref.watch(homeStateNotifierProvider);
+    final profileState = ref.watch(profileStateNotifierProvider);
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
-      appBar: const BackArrowAppBar(
+      appBar: BackArrowAppBar(
         title: 'TuneStack',
-        centerTitle: false,
-        backArrowEnable: false,
+        centerTitle: (widget.userId ?? '').isNotEmpty,
+        backArrowEnable: (widget.userId ?? '').isNotEmpty,
       ),
-      body: Column(
-        children: [
-          // Profile Details Section
-          Padding(
-            padding: AppConst.horizontalPadding.copyWith(top: AppConst.k16),
-            child: Row(
+      body: profileState.isLoading
+          ? const AppLoadingPlaceHolder()
+          : Column(
               children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundColor: AppColors.primary,
-                  child: Text(
-                    userModel?.userName.substring(0, 1) ?? '',
-                    style: AppStyles.getBoldStyle(
-                      fontSize: 25,
-                      color: AppColors.white,
-                    ),
+                // Profile Details Section
+                Padding(
+                  padding: AppConst.horizontalPadding.copyWith(top: AppConst.k16),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundColor: AppColors.primary,
+                        child: Text(
+                          (widget.userId ?? '').isNotEmpty
+                              ? profileState.userModel?.userName.substring(0, 1) ?? ''
+                              : homeState.userModel?.userName.substring(0, 1) ?? '',
+                          style: AppStyles.getBoldStyle(
+                            fontSize: 25,
+                            color: AppColors.white,
+                          ),
+                        ),
+                      ),
+                      AppConst.gap16,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (widget.userId ?? '').isNotEmpty
+                                ? profileState.userModel?.userName ?? ''
+                                : homeState.userModel?.userName ?? '',
+                            style: AppStyles.getBoldStyle(
+                              fontSize: 18,
+                              color: AppColors.primaryText,
+                            ),
+                          ),
+                          AppConst.gap4,
+                          Text(
+                            (widget.userId ?? '').isNotEmpty
+                                ? profileState.userModel?.email ?? ''
+                                : homeState.userModel?.email ?? '',
+                            style: AppStyles.getRegularStyle(
+                              fontSize: 14,
+                              color: AppColors.secondaryText,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                AppConst.gap16,
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      userModel?.userName ?? '',
-                      style: AppStyles.getBoldStyle(
-                        fontSize: 18,
-                        color: AppColors.primaryText,
-                      ),
-                    ),
-                    AppConst.gap4,
-                    Text(
-                      userModel?.email ?? '',
-                      style: AppStyles.getRegularStyle(
-                        fontSize: 14,
-                        color: AppColors.secondaryText,
-                      ),
-                    ),
+
+                AppConst.gap24,
+
+                // Tab Bar
+                TabBar(
+                  controller: _tabController,
+                  tabs: const [
+                    Tab(icon: Icon(Icons.grid_on)),
+                    Tab(icon: Icon(Icons.view_list)),
                   ],
+                  indicatorColor: AppColors.primary,
+                  labelColor: AppColors.primary,
+                  unselectedLabelColor: AppColors.divider,
+                ),
+
+                // Tab Views
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      _buildGridTab(
+                        profileState,
+                      ),
+                      _buildListTab(
+                        profileState,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-
-          AppConst.gap24,
-
-          // Tab Bar
-          TabBar(
-            controller: _tabController,
-            tabs: const [
-              Tab(icon: Icon(Icons.grid_on)),
-              Tab(icon: Icon(Icons.view_list)),
-            ],
-            indicatorColor: AppColors.primary,
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.divider,
-          ),
-
-          // Tab Views
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _buildGridTab(),
-                _buildListTab(),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _buildGridTab() {
+  Widget _buildGridTab(
+    ProfileState? profileState,
+  ) {
     return GridView.builder(
       padding: const EdgeInsets.all(AppConst.k8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -154,41 +156,69 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
         crossAxisSpacing: 4,
         mainAxisSpacing: 4,
       ),
-      itemCount: createPostState?.getAllPostByUser.length ?? 0,
+      itemCount: profileState?.getAllPostByUser.length ?? 0,
       itemBuilder: (context, index) {
-        return _buildGridItem(index);
+        final post = profileState?.getAllPostByUser[index];
+        return _buildGridItem(post ?? GetAllPosts());
       },
     );
   }
 
-  Widget _buildGridItem(int index) {
+  Widget _buildGridItem(GetAllPosts post) {
     return Container(
       color: Colors.grey[300],
-      child: ColoredBox(
-        color: index.isEven ? AppColors.primary.withValues(alpha: 0.7) : AppColors.primary.withValues(alpha: 0.5),
-        child: const Center(
-          child: Icon(
-            Icons.music_note,
-            color: AppColors.white,
-            size: 30,
-          ),
+      child: GestureDetector(
+        onTap: () async {
+          if (post.fileType == 'Audio') {
+            await NavigationHelper.navigatePush(
+              route: MusicPlayerScreen(
+                musicUrl: post.audioUrl ?? '',
+                title: post.category ?? 'Unknown Track',
+                artist: post.userName ?? 'Unknown Artist',
+                coverImageUrl: post.coverImageUrl ?? '',
+              ),
+            );
+          } else {
+            await NavigationHelper.navigatePush(
+              route: VideoPlayerScreen(
+                videoUrl: post.audioUrl ?? '',
+              ),
+            );
+          }
+        },
+        child: AppNetworkImage(
+          url: post.coverImageUrl ?? '',
+          fit: BoxFit.cover,
         ),
       ),
     );
   }
 
-  Widget _buildListTab() {
+  Widget _buildListTab(
+    ProfileState? profileState,
+  ) {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: AppConst.k16),
-      itemCount: createPostState?.getPostByCar.keys.toList().length,
+      itemCount: profileState?.getPostByCar.keys.toList().length,
       itemBuilder: (context, index) {
-        return _buildCategorySection(createPostState?.getPostByCar.keys.toList()[index]);
+        final text = profileState?.getPostByCar.keys.toList()[index] ?? '';
+        final capitalizedText = text
+            .split(' ')
+            .map(
+              (word) => word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}' : '',
+            )
+            .join(' ');
+        return _buildCategorySection(
+          capitalizedText,
+          profileState?.getPostByCar.keys.toList()[index] ?? '',
+          profileState,
+        );
       },
     );
   }
 
-  Widget _buildCategorySection(String? title) {
-    final postByCategories = createPostState?.getPostByCar[title] ?? [];
+  Widget _buildCategorySection(String? title, String? category, ProfileState? profileState) {
+    final postByCategories = profileState?.getPostByCar[category] ?? [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,7 +243,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
             padding: const EdgeInsets.symmetric(horizontal: AppConst.k8),
             itemCount: postByCategories.length,
             itemBuilder: (context, index) {
-              return _buildHorizontalListItem(index);
+              final post = postByCategories[index];
+              return buildHorizontalListItem(post);
             },
           ),
         ),
@@ -222,31 +253,36 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
     );
   }
 
-  Widget _buildHorizontalListItem(int index) {
+  Widget buildHorizontalListItem(GetAllPosts post) {
     return Container(
       width: 120,
       margin: const EdgeInsets.symmetric(horizontal: AppConst.k8),
       decoration: BoxDecoration(
-        color: index.isEven ? AppColors.primary.withValues(alpha: 0.7) : AppColors.primary.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(AppConst.k8),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.music_note,
-            color: AppColors.white,
-            size: 40,
-          ),
-          AppConst.gap8,
-          Text(
-            'Item ${index + 1}',
-            style: AppStyles.getMediumStyle(
-              fontSize: 14,
-              color: AppColors.white,
-            ),
-          ),
-        ],
+      child: GestureDetector(
+        onTap: () async {
+          if (post.fileType == 'Audio') {
+            await NavigationHelper.navigatePush(
+              route: MusicPlayerScreen(
+                musicUrl: post.audioUrl ?? '',
+                title: post.category ?? 'Unknown Track',
+                artist: post.userName ?? 'Unknown Artist',
+                coverImageUrl: post.coverImageUrl ?? '',
+              ),
+            );
+          } else {
+            await NavigationHelper.navigatePush(
+              route: VideoPlayerScreen(
+                videoUrl: post.audioUrl ?? '',
+              ),
+            );
+          }
+        },
+        child: AppNetworkImage(
+          url: post.coverImageUrl ?? '',
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }

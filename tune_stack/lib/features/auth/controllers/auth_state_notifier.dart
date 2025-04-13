@@ -64,7 +64,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   Future<User?> login(String email, String password) async {
     state = state.copyWith(isLoading: true);
     try {
-      final user = await authRepository.loginUser(email, password);
+      final user = await authRepository.loginUser(email.trim(), password.trim());
       return user;
     } finally {
       state = state.copyWith(isLoading: false);
@@ -78,7 +78,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   ) async {
     state = state.copyWith(isLoading: true);
     try {
-      final user = await authRepository.createUser(email, password, userName);
+      final user = await authRepository.createUser(email.trim(), password.trim(), userName.trim());
       if (user != null) {
         await _firestore.collection('users').doc(user.uid).set({
           'email': email,

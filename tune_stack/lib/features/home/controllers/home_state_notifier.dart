@@ -25,21 +25,23 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
   }) : super(HomeState.initial());
 
   final IHomeRepository homeRepository;
+  List<GetAllPosts>? getAllPostTempList;
 
   Future<void> getAllPosts() async {
     state = state.copyWith(isLoading: true);
     final getAllPosts = await homeRepository.getAllPost();
-    state = state.copyWith(isLoading: false);
     if (getAllPosts.isNotEmpty) {
       final getAllPostsList = getAllPosts.map(GetAllPosts.fromJson).toList().reversed.toList();
+      getAllPostTempList = getAllPostsList;
       for (final post in getAllPostsList) {
         final isLiked = await isPostLikedByCurrentUser(post.postId);
         post.isLiked = isLiked;
       }
-
       state = state.copyWith(getAllPostsList: getAllPostsList);
+      state = state.copyWith(isLoading: false);
     } else {
       state = state.copyWith(getAllPostsList: []);
+      state = state.copyWith(isLoading: false);
     }
   }
 
@@ -149,8 +151,8 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
     }
   }
 
-  Future<void> getAllComments(String? postId) async {
-    state = state.copyWith(isLoading: true);
+  Future<void> getAllComments(String? postId, {bool showLoader = true}) async {
+    state = state.copyWith(isLoading: showLoader);
     final Query query = FirebaseFirestore.instance
         .collection('posts')
         .doc(postId)
@@ -161,7 +163,7 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
 
     final allCommentsMap = snapshot.docs.map((doc) {
       final data = doc.data()! as Map<String, dynamic>;
-      data['userId'] = doc.id;
+      /*data['userId'] = doc.id;*/
       return data;
     }).toList();
 
@@ -169,5 +171,25 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
     state = state.copyWith(isLoading: false);
     debugPrint('GetAllComments:: -> ${getAllCommentsList.length}');
     state = state.copyWith(commentsList: getAllCommentsList);
+  }
+
+  void searchText(String searchQuery) {
+    if (getAllPostTempList != null) {
+      final searchPostList = <GetAllPosts>[];
+
+      if (searchQuery.isEmpty) {
+        searchPostList.addAll(getAllPostTempList!);
+      } else {
+        getAllPostTempList?.forEach(
+          (element) {
+            if (element.userName?.contains(searchQuery) ?? false) {
+              searchPostList.add(element);
+            }
+          },
+        );
+      }
+
+      state = state.copyWith(getAllPostsList: searchPostList);
+    }
   }
 }

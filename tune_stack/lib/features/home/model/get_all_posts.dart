@@ -8,6 +8,8 @@ class GetAllPosts {
     this.postId,
     this.category,
     this.userId,
+    this.userName,
+    this.fileType,
     this.isLiked,
     this.likeCount,
     this.commentCount,
@@ -22,6 +24,7 @@ class GetAllPosts {
     postId = json['postId'].toString();
     category = json['category'].toString();
     userId = json['userId'].toString();
+    fileType = json['fileType'].toString();
     likeCount =
         (json['likeCount'] != null && json['likeCount'].toString() != 'null' && json['likeCount'].toString().isNotEmpty)
             ? int.parse(json['likeCount'].toString())
@@ -31,6 +34,7 @@ class GetAllPosts {
             json['commentCount'].toString().isNotEmpty)
         ? int.parse(json['commentCount'].toString())
         : 0;
+    userName = json['userName'].toString();
   }
 
   String? createdAt;
@@ -41,9 +45,11 @@ class GetAllPosts {
   String? postId;
   String? category;
   String? userId;
+  String? fileType;
   bool? isLiked;
   int? likeCount;
   int? commentCount;
+  String? userName;
 
   Map<String, dynamic> toJson() {
     final data = <String, dynamic>{};
@@ -54,7 +60,9 @@ class GetAllPosts {
     data['postTitle'] = postTitle;
     data['postId'] = postId;
     data['category'] = category;
+    data['fileType'] = fileType;
     data['userId'] = userId;
+    data['userName'] = userName;
     data['likeCount'] = likeCount;
     data['commentCount'] = commentCount;
     return data;

@@ -69,40 +69,43 @@ class TuneStackListItem extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          // Profile avatar
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: AppColors.primary.withValues(alpha: 0.2),
-            backgroundImage: NetworkImage(imageUrl),
-          ),
-          AppConst.gap12,
-          // User info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  posterName,
-                  style: AppStyles.getMediumStyle(
-                    fontSize: 14,
-                    color: Colors.black,
-                  ),
-                ),
-                Text(
-                  category,
-                  style: AppStyles.getRegularStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
+    return GestureDetector(
+      onTap: onProfileTap,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            // Profile avatar
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: AppColors.primary.withValues(alpha: 0.2),
+              backgroundImage: NetworkImage(imageUrl),
             ),
-          ),
-        ],
+            AppConst.gap12,
+            // User info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    posterName,
+                    style: AppStyles.getMediumStyle(
+                      fontSize: 14,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Text(
+                    category,
+                    style: AppStyles.getRegularStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

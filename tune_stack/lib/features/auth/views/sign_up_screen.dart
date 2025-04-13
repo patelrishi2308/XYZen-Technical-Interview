@@ -197,6 +197,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 controller: passwordController,
                                 hintText: 'Enter your password',
                                 textInputAction: TextInputAction.next,
+                                obscureText: true,
+                                maxLines: 1,
                                 onChanged: authStateNotifier.onPasswordFieldChange,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
@@ -225,6 +227,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 focusNode: confirmPasswordFocus,
                                 controller: confirmPasswordController,
                                 hintText: 'Confirm your password',
+                                obscureText: true,
+                                maxLines: 1,
                                 textInputAction: TextInputAction.done,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {

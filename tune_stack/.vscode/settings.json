@@ -1,8 +1,8 @@
 {
     "dart.lineLength": 120,
-    "dart.flutterSdkPath": "/Users/virajvasani/Documents/Flutter/3.27.2/flutter/bin",
+    "dart.flutterSdkPath": "C:/Users/rishi/Downloads/flutter_windows_3.27.2-stable/flutter/bin",
     "cmake.configureOnOpen": true,
-    "cmake.sourceDirectory": "/Users/mac-mini-006/Documents/Projects/zora-flutter/linux",
+    // "cmake.sourceDirectory": "/Users/mac-mini-006/Documents/Projects/zora-flutter/linux",
     "editor.codeActionsOnSave": {
         "source.fixAll": "always",
         "source.organizeImports": "always"

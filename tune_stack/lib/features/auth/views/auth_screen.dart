@@ -147,6 +147,8 @@ class _AuthScreenState extends State<AuthScreen> {
                               focusNode: passwordFocus,
                               controller: passwordController,
                               hintText: 'Enter your password',
+                              obscureText: true,
+                              maxLines: 1,
                               textInputAction: TextInputAction.done,
                               onChanged: authStateNotifier.onPasswordFieldChange,
                               validator: (value) {

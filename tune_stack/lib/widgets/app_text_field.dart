@@ -46,6 +46,7 @@ class AppTextField extends StatelessWidget {
     this.textFieldHeight,
     this.textFieldWidth,
     this.isSubmitted = false,
+    this.obscureText = false,
     this.suffixStyle,
     this.errorStyle,
     this.textCapitalization = TextCapitalization.none,
@@ -89,6 +90,7 @@ class AppTextField extends StatelessWidget {
   final TextStyle? suffixStyle;
   final TextStyle? errorStyle;
   final TextCapitalization textCapitalization;
+  final bool obscureText;
 
   static InputBorder textFieldBorder() {
     return OutlineInputBorder(
@@ -107,6 +109,7 @@ class AppTextField extends StatelessWidget {
       width: textFieldWidth ?? AppConst.width,
       child: TextFormField(
         textCapitalization: textCapitalization,
+        obscureText: obscureText,
         autovalidateMode: isSubmitted ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
         focusNode: (showDoneKeyboard ?? false) && Platform.isIOS
             ? (focusNode!
