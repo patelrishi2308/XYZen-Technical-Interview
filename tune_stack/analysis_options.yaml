@@ -1,0 +1,17 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  errors:
+    avoid_positional_boolean_parameters: ignore
+  exclude:
+    - '**/*.g.dart'
+    - lib/generated/**
+
+linter:
+  rules:
+    public_member_api_docs: false
+    library_private_types_in_public_api: false
+    always_use_package_imports: true
+    sort_pub_dependencies: false
+    directives_ordering: false
+    lines_longer_than_80_chars: false
