@@ -1,45 +1,68 @@
-# Tune Stack
+# XYZen Technical Interview - Tune Stack
 
-Tune Stack is a modern social media application built with Flutter, designed for music enthusiasts to share and discover music-related content.
+A Flutter-based music social media application developed as part of the XYZen technical interview process. This project demonstrates modern Flutter development practices, clean architecture, and integration with Firebase services.
 
 ## 🚀 Features
 
 - **Authentication System**
-  - Secure user authentication using Firebase Auth
+  - Firebase Authentication integration
   - Profile management
-  - PIN code verification
+  - Secure user sessions
 
 - **Social Features**
-  - Create and share posts
-  - User profiles
-  - Home feed
-  - Interactive bottom navigation
+  - Create and share music-related posts
+  - User profile customization
+  - Interactive home feed
+  - Bottom navigation for seamless experience
 
 - **Technical Features**
-  - Firebase integration (Analytics, Auth, Firestore)
-  - Environment-based configuration (Development/Production)
-  - Localization support
-  - Responsive design
-  - File and image picking capabilities
+  - Firebase Analytics and Core integration
+  - Multi-environment support (Development/Production)
+  - Responsive UI design
+  - Media handling (images and files)
   - Offline data persistence
-  - Internet connectivity handling
+  - Network connectivity management
+  - Custom error handling
 
-## 🛠️ Built With
+## 🛠️ Technical Stack
 
 - **Framework**: Flutter (SDK >=3.0.0)
-- **State Management**: Flutter Riverpod
-- **Backend Services**: Firebase
-- **Storage**: Cloud Firestore
-- **UI Components**: Custom widgets and Material Design
-- **Asset Management**: Flutter Gen
-- **Utilities**:
-  - master_utility
-  - easy_localization
-  - toastification
-  - connectivity_plus
-  - permission_handler
+- **State Management**: Flutter Riverpod 2.6.1
+- **Backend Services**: 
+  - Firebase Core 3.13.0
+  - Firebase Analytics 11.4.5
+  - Firebase Auth 5.5.2
+  - Cloud Firestore 5.6.6
+- **UI/UX**:
+  - Material Design
+  - Custom SVG assets
+  - Heebo font family
+  - Gap 3.0.1 for spacing
+  - Toastification 3.0.2 for notifications
+- **Development Tools**:
+  - Very Good Analysis 5.1.0
+  - Flutter Gen Runner 5.10.0
+  - Build Runner 2.4.9
+  - Import Sorter 4.6.0
 
 ## 🏗️ Project Structure
+
+```
+lib/
+├── features/ # Core feature modules
+│ ├── auth/ # Authentication
+│ ├── home/ # Home screen
+│ ├── profile/ # User profiles
+│ ├── create_post/ # Post creation
+│ ├── splash/ # Splash screen
+│ ├── common/ # Shared feature components
+│ └── bottom_nav_bar/ # Navigation
+├── config/ # Configuration and assets
+├── constants/ # App constants
+├── helpers/ # Helper utilities
+├── services/ # Service layer
+└── widgets/ # Reusable widgets
+```
 
 ## 🚦 Getting Started
 
@@ -47,50 +70,82 @@ Tune Stack is a modern social media application built with Flutter, designed for
 
 - Flutter SDK >=3.0.0
 - Firebase project setup
-- Android Studio / VS Code with Flutter extensions
+- Android Studio / VS Code
+- Git
 
 ### Installation
 
 1. Clone the repository
 ```bash
 git clone https://github.com/patelrishi2308/XYZen-Technical-Interview.git
+cd XYZen-Technical-Interview
 ```
 
-2. Install dependencies
+2. Navigate to the project directory
+```bash
+cd "Tune Stack"
+```
+
+3. Install dependencies
 ```bash
 flutter pub get
 ```
 
-3. Setup environment files
-- Create `.env.development` and `.env.production` files
-- Configure Firebase credentials
+4. Setup environment files
+Create two environment files in the root directory:
+- `.env.development`
+- `.env.production`
 
-4. Run the app
+5. Configure Firebase
+- Add your `google-services.json` to `android/app/`
+- Configure Firebase project settings with package name:
+  - Development: `com.tunestack.app.dev`
+  - Production: `com.tunestack.app`
+
+6. Run the app
 ```bash
-# For development
+# Development
 flutter run --flavor dev
 
-# For production
+# Production
 flutter run --flavor prod
 ```
 
-## 🔐 Environment Configuration
+## 📱 Platform Support
 
-The app uses different environment configurations for development and production:
-- `.env.development` - Development environment variables
-- `.env.production` - Production environment variables
+- ✅ Android
+- ✅ iOS
+- 🚧 Web (in development)
+- 🚧 macOS (in development)
+- 🚧 Linux (in development)
 
-## 📱 Supported Platforms
+## 🔄 Development Features
 
-- Android
-- iOS
-- Web (in progress)
-- macOS (in progress)
-- Linux (in progress)
+- **Code Quality**
+  - Very Good Analysis for strict code analysis
+  - Import sorting for organized imports
+  - Build runner for code generation
 
-## 🔄 CI/CD
+- **Build Configuration**
+  - Automated version management
+  - Development and Production flavors
+  - Environment-specific configurations
 
-The project includes:
-- Code analysis using `very_good_analysis`
-- Automated build versioning
-- Multiple flavor support (dev/prod)
+- **Asset Management**
+  - Flutter Gen for type-safe asset access
+  - SVG support
+  - Custom font integration (Heebo)
+
+## 📝 Notes
+
+- This is a technical interview project demonstrating Flutter development capabilities
+- The project uses Flutter 3.0+ features and modern development practices
+- Firebase configuration is required for full functionality
+
+## 🤝 Contributing
+
+This is a technical interview project and is not open for contributions.
+
+## 📄 License
+
+This project is part of a technical interview process and is not licensed for public use.
