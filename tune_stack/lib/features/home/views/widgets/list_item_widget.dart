@@ -165,14 +165,7 @@ class TuneStackListItem extends StatelessWidget {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: posterName,
-                  style: AppStyles.getMediumStyle(
-                    fontSize: 14,
-                    color: Colors.black,
-                  ),
-                ),
-                TextSpan(
-                  text: ' $description',
+                  text: description,
                   style: AppStyles.getRegularStyle(
                     fontSize: 14,
                     color: Colors.black87,

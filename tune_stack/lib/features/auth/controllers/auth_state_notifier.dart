@@ -84,7 +84,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
           'email': email,
           'userName': userName,
           'uid': user.uid,
-          'createdAt': Timestamp.now(),
+          'createdAt': DateTime.now().millisecondsSinceEpoch,
         });
       }
 

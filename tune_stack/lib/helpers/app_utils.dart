@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart' as handler;
 import 'package:tune_stack/config/assets/colors.gen.dart';
 import 'package:tune_stack/constants/app_dimensions.dart';
 import 'package:tune_stack/helpers/device_info_helper.dart';
+import 'package:path/path.dart' as p;
 
 class AppUtils {
   AppUtils._();
@@ -221,5 +222,9 @@ class AppUtils {
         );
       },
     );
+  }
+
+  static String getExtensionFromPath(String path) {
+    return p.extension(path).replaceFirst('.', '');
   }
 }

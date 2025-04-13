@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:master_utility/master_utility.dart';
 import 'package:tune_stack/config/assets/colors.gen.dart';
 import 'package:tune_stack/features/create_post/views/create_post_screen.dart';
+import 'package:tune_stack/features/home/controllers/home_state_notifier.dart';
 import 'package:tune_stack/features/home/views/home_screen.dart';
 import 'package:tune_stack/features/profile/views/profile_screen.dart';
 
-class BottomNavBarScreen extends StatefulWidget {
+class BottomNavBarScreen extends ConsumerStatefulWidget {
   const BottomNavBarScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _BottomNavBarScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _BottomNavBarScreenState();
 }
 
-class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
+class _BottomNavBarScreenState extends ConsumerState<BottomNavBarScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = const [
@@ -27,7 +29,20 @@ class _BottomNavBarScreenState extends State<BottomNavBarScreen> {
       return;
     }
     setState(() {
+      if (_selectedIndex == 0 && index == 0) {
+        ref.read(homeStateNotifierProvider.notifier).getAllPosts();
+      } else if (_selectedIndex == 2 && index == 2) {
+        // ref.read(homeStateNotifierProvider.notifier).getAllPosts();
+      }
       _selectedIndex = index;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(homeStateNotifierProvider.notifier).getAllPosts();
     });
   }
 

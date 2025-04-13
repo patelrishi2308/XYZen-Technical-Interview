@@ -1,23 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tune_stack/config/assets/colors.gen.dart';
 import 'package:tune_stack/constants/app_dimensions.dart';
+import 'package:tune_stack/constants/app_strings.dart';
 import 'package:tune_stack/constants/app_styles.dart';
+import 'package:tune_stack/features/home/model/get_all_posts.dart';
+import 'package:tune_stack/features/profile/controllers/profile_state.dart';
+import 'package:tune_stack/features/profile/controllers/profile_state_notifier.dart';
+import 'package:tune_stack/helpers/preference_helper.dart';
 import 'package:tune_stack/widgets/back_arrow_app_bar.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
+class _ProfileScreenState extends ConsumerState<ProfileScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  ProfileStateNotifier? profileStateNotifier;
+  ProfileState? createPostState;
+  List<GetAllPosts>? getAllPostByUser = [];
+  Map<String, List<GetAllPosts>> groupedByCategory = {};
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    profileStateNotifier = ref.read(profileStateNotifierProvider.notifier);
+    createPostState = ref.read(profileStateNotifierProvider);
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (timeStamp) {
+        _getAllPostByUser();
+      },
+    );
+  }
+
+  Future<void> _getAllPostByUser() async {
+    final userId = SharedPreferenceHelper.getString(AppStrings.userID);
+    getAllPostByUser = await profileStateNotifier?.getAllPostsByUser(userId);
+    groupedByCategory = profileStateNotifier?.groupPostsByCategory(getAllPostByUser) ?? {};
+    setState(() {});
   }
 
   @override
@@ -116,7 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         crossAxisSpacing: 4,
         mainAxisSpacing: 4,
       ),
-      itemCount: 30,
+      itemCount: getAllPostByUser?.length ?? 0,
       itemBuilder: (context, index) {
         return _buildGridItem(index);
       },
@@ -127,7 +153,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     return Container(
       color: Colors.grey[300],
       child: ColoredBox(
-        color: index.isEven ? AppColors.primary.withValues(alpha: 0.7) : AppColors.primary.withValues(alpha: 0.5),
+        color: index.isEven
+            ? AppColors.primary.withValues(alpha: 0.7)
+            : AppColors.primary.withValues(alpha: 0.5),
         child: const Center(
           child: Icon(
             Icons.music_note,
@@ -140,32 +168,24 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 
   Widget _buildListTab() {
-    final categories = <String>[
-      'Pop',
-      'Rock',
-      'Hip Hop',
-      'Jazz',
-      'Classical',
-      'Electronic',
-      'R&B',
-      'Country',
-    ];
-
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: AppConst.k16),
-      itemCount: categories.length,
+      itemCount: groupedByCategory.keys.toList().length,
       itemBuilder: (context, index) {
-        return _buildCategorySection(categories[index]);
+        return _buildCategorySection(groupedByCategory.keys.toList()[index]);
       },
     );
   }
 
   Widget _buildCategorySection(String title) {
+    final postByCategories = groupedByCategory[title] ?? [];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppConst.k16, vertical: AppConst.k8),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppConst.k16, vertical: AppConst.k8),
           child: Text(
             title,
             style: AppStyles.getBoldStyle(
@@ -179,7 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: AppConst.k8),
-            itemCount: 10,
+            itemCount: postByCategories.length ?? 0,
             itemBuilder: (context, index) {
               return _buildHorizontalListItem(index);
             },
@@ -195,7 +215,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       width: 120,
       margin: const EdgeInsets.symmetric(horizontal: AppConst.k8),
       decoration: BoxDecoration(
-        color: index.isEven ? AppColors.primary.withValues(alpha: 0.7) : AppColors.primary.withValues(alpha: 0.5),
+        color: index.isEven
+            ? AppColors.primary.withValues(alpha: 0.7)
+            : AppColors.primary.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(AppConst.k8),
       ),
       child: Column(

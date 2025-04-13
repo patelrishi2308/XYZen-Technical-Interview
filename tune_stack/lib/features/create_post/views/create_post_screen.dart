@@ -1,25 +1,32 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:master_utility/master_utility.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tune_stack/config/assets/colors.gen.dart';
+import 'package:tune_stack/config/custom_exception.dart';
 import 'package:tune_stack/constants/app_dimensions.dart';
+import 'package:tune_stack/constants/app_strings.dart';
 import 'package:tune_stack/constants/app_styles.dart';
+import 'package:tune_stack/features/create_post/controllers/create_post_state_notifier.dart';
+import 'package:tune_stack/features/home/controllers/home_state_notifier.dart';
 import 'package:tune_stack/helpers/app_utils.dart';
+import 'package:tune_stack/helpers/preference_helper.dart';
 import 'package:tune_stack/helpers/toast_helper.dart';
 import 'package:tune_stack/widgets/app_button.dart';
 import 'package:tune_stack/widgets/app_text_field.dart';
 import 'package:tune_stack/widgets/back_arrow_app_bar.dart';
 
-class CreatePostScreen extends StatefulWidget {
+class CreatePostScreen extends ConsumerStatefulWidget {
   const CreatePostScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _CreatePostScreenState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _CreatePostScreenState();
 }
 
-class _CreatePostScreenState extends State<CreatePostScreen> {
+class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
@@ -29,8 +36,27 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   File? _selectedMusic;
   String? _musicFileName;
   String? _musicFileSize;
-  final bool _isUploading = false;
-  final List<String> _categories = ['Pop', 'Rock', 'Hip Hop', 'Jazz', 'Classical', 'Electronic', 'R&B', 'Country'];
+  final List<String> _categories = [
+    'Pop',
+    'Rock',
+    'Hip Hop',
+    'Jazz',
+    'Classical',
+    'Electronic',
+    'R&B',
+    'Country',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    getAllImages();
+  }
+
+  Future<void> getAllImages() async {
+    await Supabase.instance.client.storage.from('spotifyclone').list();
+    debugPrint('Images');
+  }
 
   @override
   void dispose() {
@@ -126,11 +152,50 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     );
   }
 
-  Future<void> _submitPost() async {
+  Future<void> _submitPost(
+    CreatePostStateNotifier? createPostStateNotifier,
+  ) async {
     if (_formKey.currentState!.validate() && _validateFiles()) {
-      //! Call Firebase Function to Create Post
-      AppToastHelper.showSuccess('Post created successfully!');
-      NavigationHelper.navigatePop();
+      if (_selectedImage == null) {
+        AppToastHelper.showError('Please select cover image');
+      } else if (_selectedMusic == null) {
+        AppToastHelper.showError('Please select music');
+      } else if (_selectedImage != null && _selectedMusic != null) {
+        try {
+          final coverImageURL = await createPostStateNotifier?.uploadCoverImage(_selectedImage!);
+          final audioFileURL = await createPostStateNotifier?.uploadMusicFiles(_selectedMusic!);
+          final userId = SharedPreferenceHelper.getString(AppStrings.userID);
+
+          if (coverImageURL != null && audioFileURL != null && userId != null) {
+            final createPost = await createPostStateNotifier?.createPost(
+              coverImageURL,
+              _titleController.text,
+              _categoryController.text,
+              _descriptionController.text,
+              audioFileURL,
+              userId,
+            );
+            if (createPost == 'success') {
+              AppToastHelper.showSuccess('Post created successfully!');
+              NavigationHelper.navigatePop();
+            } else {
+              AppToastHelper.showError(
+                'Something went wrong please try again later',
+              );
+            }
+          } else {
+            AppToastHelper.showError(
+              'Something went wrong please try again later',
+            );
+          }
+        } catch (e) {
+          if (e is CustomException) {
+            AppToastHelper.showError(e.message);
+          }
+        } finally {
+          createPostStateNotifier?.setLoading(false);
+        }
+      }
     }
   }
 
@@ -150,6 +215,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final createPostState = ref.watch(createPostStateNotifierProvider);
+    final createPostStateNotifier = ref.read(createPostStateNotifierProvider.notifier);
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       appBar: const BackArrowAppBar(
@@ -159,97 +226,108 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(AppConst.k16),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Image Selection
-                  _buildImageSelector(),
-                  AppConst.gap20,
+            child: Consumer(
+              builder: (context, ref, child) {
+                return Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Image Selection
+                      _buildImageSelector(),
+                      AppConst.gap20,
 
-                  // Title Field
-                  Text(
-                    'Post Title',
-                    style: AppStyles.getMediumStyle(
-                      fontSize: AppConst.k14,
-                      color: AppColors.primaryText,
-                    ),
-                  ),
-                  AppConst.gap8,
-                  AppTextField(
-                    controller: _titleController,
-                    hintText: 'Enter post title',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a title';
-                      }
-                      return null;
-                    },
-                  ),
-                  AppConst.gap20,
+                      // Title Field
+                      Text(
+                        'Post Title',
+                        style: AppStyles.getMediumStyle(
+                          fontSize: AppConst.k14,
+                          color: AppColors.primaryText,
+                        ),
+                      ),
+                      AppConst.gap8,
+                      AppTextField(
+                        controller: _titleController,
+                        hintText: 'Enter post title',
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a title';
+                          }
+                          return null;
+                        },
+                      ),
+                      AppConst.gap20,
 
-                  // Category Selection
-                  Text(
-                    'Category',
-                    style: AppStyles.getMediumStyle(
-                      fontSize: AppConst.k14,
-                      color: AppColors.primaryText,
-                    ),
-                  ),
-                  AppConst.gap8,
-                  AppTextField(
-                    controller: _categoryController,
-                    hintText: 'Select category',
-                    readOnly: true,
-                    onTap: _showCategoryPicker,
-                    suffixIcon: const Icon(Icons.arrow_drop_down, color: AppColors.primary),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select a category';
-                      }
-                      return null;
-                    },
-                  ),
-                  AppConst.gap20,
+                      // Category Selection
+                      Text(
+                        'Category',
+                        style: AppStyles.getMediumStyle(
+                          fontSize: AppConst.k14,
+                          color: AppColors.primaryText,
+                        ),
+                      ),
+                      AppConst.gap8,
+                      AppTextField(
+                        controller: _categoryController,
+                        hintText: 'Select category',
+                        readOnly: true,
+                        onTap: _showCategoryPicker,
+                        suffixIcon: const Icon(
+                          Icons.arrow_drop_down,
+                          color: AppColors.primary,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select a category';
+                          }
+                          return null;
+                        },
+                      ),
+                      AppConst.gap20,
 
-                  // Description Field
-                  Text(
-                    'Description',
-                    style: AppStyles.getMediumStyle(
-                      fontSize: AppConst.k14,
-                      color: AppColors.primaryText,
-                    ),
-                  ),
-                  AppConst.gap8,
-                  AppTextField(
-                    controller: _descriptionController,
-                    hintText: 'Describe your post',
-                    maxLines: 4,
-                    keyboardType: TextInputType.multiline,
-                    textFieldHeight: AppConst.k100,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter a description';
-                      }
-                      return null;
-                    },
-                  ),
-                  AppConst.gap20,
+                      // Description Field
+                      Text(
+                        'Description',
+                        style: AppStyles.getMediumStyle(
+                          fontSize: AppConst.k14,
+                          color: AppColors.primaryText,
+                        ),
+                      ),
+                      AppConst.gap8,
+                      AppTextField(
+                        controller: _descriptionController,
+                        hintText: 'Describe your post',
+                        maxLines: 4,
+                        keyboardType: TextInputType.multiline,
+                        textFieldHeight: AppConst.k100,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter a description';
+                          }
+                          return null;
+                        },
+                      ),
+                      AppConst.gap20,
 
-                  // Music File Selection
-                  _buildMusicFileSelector(),
-                  AppConst.gap32,
+                      // Music File Selection
+                      _buildMusicFileSelector(),
+                      AppConst.gap32,
 
-                  // Submit Button
-                  AppButton(
-                    title: 'Create Post',
-                    onPressed: _submitPost,
-                    isLoading: _isUploading,
+                      // Submit Button
+                      AppButton(
+                        title: 'Create Post',
+                        onPressed: () async {
+                          await _submitPost(createPostStateNotifier).then((_) {
+                            ref.read(homeStateNotifierProvider.notifier).getAllPosts();
+                          });
+                        },
+                        isLoading: createPostState.isLoading,
+                      ),
+                      AppConst.gap32,
+                    ],
                   ),
-                  AppConst.gap32,
-                ],
-              ),
+                );
+              },
             ),
           ),
         ),

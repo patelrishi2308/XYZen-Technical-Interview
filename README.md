@@ -1,108 +1,83 @@
-# XYZen Technical Interview - Tune Stack
+# Tune Stack
 
-A Flutter-based music social media application developed as part of the XYZen technical interview process. This project demonstrates modern Flutter development practices, clean architecture, and integration with Firebase services.
+A modern Flutter-based music social media application that allows users to share and discover music-related content.
 
-## 🚀 Features
+## 🎯 Key Features
 
-- **Authentication System**
-  - Firebase Authentication integration
+- **User Authentication**
+  - Firebase Authentication
   - Profile management
-  - Secure user sessions
+  - Secure sessions
 
-- **Social Features**
-  - Create and share music-related posts
-  - User profile customization
-  - Interactive home feed
-  - Bottom navigation for seamless experience
+- **Core Features**
+  - Music post creation and sharing
+  - User profiles
+  - Interactive feed
+  - Media file handling
+  - Offline support
 
-- **Technical Features**
-  - Firebase Analytics and Core integration
-  - Multi-environment support (Development/Production)
-  - Responsive UI design
-  - Media handling (images and files)
-  - Offline data persistence
-  - Network connectivity management
-  - Custom error handling
+## 🛠️ Tech Stack
 
-## 🛠️ Technical Stack
+- **Core**
+  - Flutter SDK >=3.0.0
+  - Riverpod 2.6.1 (State Management)
 
-- **Framework**: Flutter (SDK >=3.0.0)
-- **State Management**: Flutter Riverpod 2.6.1
-- **Backend Services**: 
+- **Firebase Services**
   - Firebase Core 3.13.0
-  - Firebase Analytics 11.4.5
   - Firebase Auth 5.5.2
   - Cloud Firestore 5.6.6
-- **UI/UX**:
-  - Material Design
-  - Custom SVG assets
-  - Heebo font family
-  - Gap 3.0.1 for spacing
-  - Toastification 3.0.2 for notifications
-- **Development Tools**:
-  - Very Good Analysis 5.1.0
-  - Flutter Gen Runner 5.10.0
-  - Build Runner 2.4.9
-  - Import Sorter 4.6.0
+  - Firebase Analytics 11.4.5
 
-## 🏗️ Project Structure
+- **UI/UX**
+  - Material Design
+  - SVG support
+  - Custom Heebo font
+  - Responsive layouts
+
+## 📁 Project Structure
 
 ```
 lib/
-├── features/ # Core feature modules
+├── features/
 │ ├── auth/ # Authentication
-│ ├── home/ # Home screen
+│ ├── home/ # Home feed
 │ ├── profile/ # User profiles
 │ ├── create_post/ # Post creation
-│ ├── splash/ # Splash screen
-│ ├── common/ # Shared feature components
-│ └── bottom_nav_bar/ # Navigation
-├── config/ # Configuration and assets
-├── constants/ # App constants
-├── helpers/ # Helper utilities
-├── services/ # Service layer
-└── widgets/ # Reusable widgets
+│ ├── splash/ # App initialization
+│ └── common/ # Shared components
+├── config/ # App configuration
+├── services/ # Business logic
+└── widgets/ # Reusable UI components
 ```
 
-## 🚦 Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
 - Flutter SDK >=3.0.0
-- Firebase project setup
-- Android Studio / VS Code
-- Git
+- Firebase project
+- Android Studio/VS Code
 
-### Installation
+### Setup Steps
 
-1. Clone the repository
+1. **Clone Repository**
 ```bash
 git clone https://github.com/patelrishi2308/XYZen-Technical-Interview.git
 cd XYZen-Technical-Interview
 ```
 
-2. Navigate to the project directory
+2. **Install Dependencies**
 ```bash
 cd "Tune Stack"
-```
-
-3. Install dependencies
-```bash
 flutter pub get
 ```
 
-4. Setup environment files
-Create two environment files in the root directory:
-- `.env.development`
-- `.env.production`
+3. **Environment Setup**
+- Create `.env.development` and `.env.production`
+- Add Firebase configuration
+- Place `google-services.json` in `android/app/`
 
-5. Configure Firebase
-- Add your `google-services.json` to `android/app/`
-- Configure Firebase project settings with package name:
-  - Development: `com.tunestack.app.dev`
-  - Production: `com.tunestack.app`
-
-6. Run the app
+4. **Run Application**
 ```bash
 # Development
 flutter run --flavor dev
@@ -111,36 +86,20 @@ flutter run --flavor dev
 flutter run --flavor prod
 ```
 
-## 📱 Platform Support
+## 📱 Supported Platforms
 
 - ✅ Android
 - ✅ iOS
-- 🚧 Web (in development)
-- 🚧 macOS (in development)
-- 🚧 Linux (in development)
+- 🚧 Web, macOS, Linux (in development)
 
-## 🔄 Development Features
+## 🔐 Package Names
 
-- **Code Quality**
-  - Very Good Analysis for strict code analysis
-  - Import sorting for organized imports
-  - Build runner for code generation
+- Development: `com.tunestack.app.dev`
+- Production: `com.tunestack.app`
 
-- **Build Configuration**
-  - Automated version management
-  - Development and Production flavors
-  - Environment-specific configurations
+## 📝 Note
 
-- **Asset Management**
-  - Flutter Gen for type-safe asset access
-  - SVG support
-  - Custom font integration (Heebo)
-
-## 📝 Notes
-
-- This is a technical interview project demonstrating Flutter development capabilities
-- The project uses Flutter 3.0+ features and modern development practices
-- Firebase configuration is required for full functionality
+This project is part of a technical interview process and demonstrates Flutter development capabilities using modern architecture and best practices.
 
 ## 🤝 Contributing
 

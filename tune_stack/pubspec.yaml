@@ -33,7 +33,9 @@ dependencies:
   flutter_svg: ^2.0.17
   image_picker: ^1.1.2
   file_picker: ^8.3.7
-
+  firebase_storage: ^12.4.5
+  supabase_flutter: ^2.8.4
+  intl: ^0.20.2
 
 dev_dependencies:
   envied_generator: ^0.5.4+1
