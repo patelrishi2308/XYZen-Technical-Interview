@@ -13,23 +13,11 @@ class HomeRepository implements IHomeRepository {
   @override
   Future<List<Map<String, dynamic>>> getAllPost() async {
     try {
-      final Query query =
-          FirebaseFirestore.instance.collection('posts').orderBy('createdAt'); // Use a field to order, like 'createdAt'
-
-      // Apply pagination if a last document exists
-      // if (_lastDocument != null) {
-      //   query = query.startAfterDocument(_lastDocument!);
-      // }
+      final Query query = FirebaseFirestore.instance
+          .collection('posts')
+          .orderBy('createdAt'); // Use a field to order, like 'createdAt'
 
       final snapshot = await query.get();
-
-      // if (snapshot.docs.isEmpty) {
-      //   _hasMorePosts = false; // No more posts available
-      //   return [];
-      // }
-
-      // Save the last document for pagination
-      // _lastDocument = snapshot.docs.last;
 
       // Return the data and add userId
       return snapshot.docs.map((doc) {

@@ -26,35 +26,32 @@ class ProfileStateNotifier extends StateNotifier<ProfileState> {
   Future<List<GetAllPosts>> getAllPostsByUser(String? userId) async {
     if (userId != null) {
       final getAllPosts = await profileRepository.getAllPostByUser(userId);
-      return getAllPosts.map(
+      final getAllPostByUser = getAllPosts.map(
         (e) {
           return GetAllPosts.fromJson(e);
         },
       ).toList();
+      state = state.copyWith(getAllPostByUser: getAllPostByUser);
+      groupPostsByCategory();
     }
 
     return [];
   }
 
-  Map<String, List<GetAllPosts>> groupPostsByCategory(
-    List<GetAllPosts>? posts,
-  ) {
-    if (posts != null) {
-      final grouped = <String, List<GetAllPosts>>{};
+  Map<String, List<GetAllPosts>> groupPostsByCategory() {
+    final grouped = <String, List<GetAllPosts>>{};
 
-      for (final post in posts) {
-        final category = post.category;
-        if (category == null) continue;
+    for (final post in state.getAllPostByUser) {
+      final category = post.category;
+      if (category == null) continue;
 
-        if (!grouped.containsKey(category)) {
-          grouped[category] = [];
-        }
-        grouped[category]!.add(post);
+      if (!grouped.containsKey(category)) {
+        grouped[category] = [];
       }
-
-      return grouped;
+      grouped[category]!.add(post);
     }
 
-    return {};
+    state = state.copyWith(getPostByCar: grouped);
+    return grouped;
   }
 }

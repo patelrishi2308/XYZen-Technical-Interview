@@ -12,6 +12,7 @@ import 'package:tune_stack/constants/app_strings.dart';
 import 'package:tune_stack/constants/app_styles.dart';
 import 'package:tune_stack/features/create_post/controllers/create_post_state_notifier.dart';
 import 'package:tune_stack/features/home/controllers/home_state_notifier.dart';
+import 'package:tune_stack/features/profile/controllers/profile_state_notifier.dart';
 import 'package:tune_stack/helpers/app_utils.dart';
 import 'package:tune_stack/helpers/preference_helper.dart';
 import 'package:tune_stack/helpers/toast_helper.dart';
@@ -23,7 +24,7 @@ class CreatePostScreen extends ConsumerStatefulWidget {
   const CreatePostScreen({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _CreatePostScreenState();
+  ConsumerState<CreatePostScreen> createState() => _CreatePostScreenState();
 }
 
 class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
@@ -319,6 +320,11 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
                         onPressed: () async {
                           await _submitPost(createPostStateNotifier).then((_) {
                             ref.read(homeStateNotifierProvider.notifier).getAllPosts();
+                            ref.read(profileStateNotifierProvider.notifier).getAllPostsByUser(
+                                  SharedPreferenceHelper.getString(
+                                    AppStrings.userID,
+                                  ),
+                                );
                           });
                         },
                         isLoading: createPostState.isLoading,

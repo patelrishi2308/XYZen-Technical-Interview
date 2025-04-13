@@ -7,8 +7,7 @@ import 'package:tune_stack/features/create_post/repository/create_post_repositor
 import 'package:tune_stack/helpers/app_utils.dart';
 import 'package:tune_stack/helpers/preference_helper.dart';
 
-final createPostStateNotifierProvider =
-    StateNotifierProvider<CreatePostStateNotifier, CreatePostState>(
+final createPostStateNotifierProvider = StateNotifierProvider<CreatePostStateNotifier, CreatePostState>(
   (ref) => CreatePostStateNotifier(
     createPostRepository: ref.read(_createPostRepository),
   ),
@@ -30,8 +29,7 @@ class CreatePostStateNotifier extends StateNotifier<CreatePostState> {
     final fileName =
         'CoverImage/${SharedPreferenceHelper.getString(AppStrings.userID)}_${DateTime.now().millisecondsSinceEpoch}.$fileExtension';
 
-    final downloadCoverImageURL =
-        await createPostRepository.uploadCoverImage(file, fileName);
+    final downloadCoverImageURL = await createPostRepository.uploadCoverImage(file, fileName);
     return downloadCoverImageURL;
   }
 
@@ -40,8 +38,7 @@ class CreatePostStateNotifier extends StateNotifier<CreatePostState> {
     final fileName =
         'Music/${SharedPreferenceHelper.getString(AppStrings.userID)}_${DateTime.now().millisecondsSinceEpoch}.$fileExtension';
 
-    final downloadCoverImageURL =
-        await createPostRepository.uploadMusic(file, fileName);
+    final downloadCoverImageURL = await createPostRepository.uploadMusic(file, fileName);
     return downloadCoverImageURL;
   }
 
@@ -49,10 +46,22 @@ class CreatePostStateNotifier extends StateNotifier<CreatePostState> {
     state = state.copyWith(isLoading: value);
   }
 
-  Future<String> createPost(String coverImageUrl, String postTitle,
-      String category, String description, String audioUrl, String uId) async {
+  Future<String> createPost(
+    String coverImageUrl,
+    String postTitle,
+    String category,
+    String description,
+    String audioUrl,
+    String uId,
+  ) async {
     final createPost = await createPostRepository.createPost(
-        coverImageUrl, postTitle, category, description, audioUrl, uId);
+      coverImageUrl,
+      postTitle,
+      category,
+      description,
+      audioUrl,
+      uId,
+    );
 
     return createPost;
   }

@@ -11,7 +11,7 @@ class BottomNavBarScreen extends ConsumerStatefulWidget {
   const BottomNavBarScreen({super.key});
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _BottomNavBarScreenState();
+  ConsumerState<BottomNavBarScreen> createState() => _BottomNavBarScreenState();
 }
 
 class _BottomNavBarScreenState extends ConsumerState<BottomNavBarScreen> {
@@ -32,7 +32,7 @@ class _BottomNavBarScreenState extends ConsumerState<BottomNavBarScreen> {
       if (_selectedIndex == 0 && index == 0) {
         ref.read(homeStateNotifierProvider.notifier).getAllPosts();
       } else if (_selectedIndex == 2 && index == 2) {
-        // ref.read(homeStateNotifierProvider.notifier).getAllPosts();
+        ref.read(homeStateNotifierProvider.notifier).getUserByUserId();
       }
       _selectedIndex = index;
     });
@@ -43,12 +43,14 @@ class _BottomNavBarScreenState extends ConsumerState<BottomNavBarScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(homeStateNotifierProvider.notifier).getAllPosts();
+      ref.read(homeStateNotifierProvider.notifier).getUserByUserId();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.white,
       body: _screens[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -59,8 +61,10 @@ class _BottomNavBarScreenState extends ConsumerState<BottomNavBarScreen> {
               offset: const Offset(0, -3),
             ),
           ],
+          color: AppColors.white,
         ),
         child: BottomNavigationBar(
+          backgroundColor: AppColors.white,
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
           selectedItemColor: AppColors.primary,

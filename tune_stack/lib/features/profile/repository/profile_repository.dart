@@ -1,3 +1,5 @@
+// ignore_for_file: one_member_abstracts
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tune_stack/config/custom_exception.dart';
 
@@ -9,9 +11,7 @@ class ProfileRepository implements IProfileRepository {
   @override
   Future<List<Map<String, dynamic>>> getAllPostByUser(String userId) async {
     try {
-      final Query query = FirebaseFirestore.instance
-          .collection('posts')
-          .where('userId', isEqualTo: userId);
+      final Query query = FirebaseFirestore.instance.collection('posts').where('userId', isEqualTo: userId);
 
       final snapshot = await query.get();
 

@@ -4,7 +4,9 @@ import 'package:tune_stack/config/assets/colors.gen.dart';
 import 'package:tune_stack/constants/app_dimensions.dart';
 import 'package:tune_stack/constants/app_strings.dart';
 import 'package:tune_stack/constants/app_styles.dart';
-import 'package:tune_stack/features/home/model/get_all_posts.dart';
+import 'package:tune_stack/features/common/user_model.dart';
+import 'package:tune_stack/features/home/controllers/home_state.dart';
+import 'package:tune_stack/features/home/controllers/home_state_notifier.dart';
 import 'package:tune_stack/features/profile/controllers/profile_state.dart';
 import 'package:tune_stack/features/profile/controllers/profile_state_notifier.dart';
 import 'package:tune_stack/helpers/preference_helper.dart';
@@ -17,20 +19,24 @@ class ProfileScreen extends ConsumerStatefulWidget {
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends ConsumerState<ProfileScreen>
-    with SingleTickerProviderStateMixin {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+
+  /*List<GetAllPosts>? getAllPostByUser = [];
+  Map<String, List<GetAllPosts>> groupedByCategory = {};*/
   ProfileStateNotifier? profileStateNotifier;
   ProfileState? createPostState;
-  List<GetAllPosts>? getAllPostByUser = [];
-  Map<String, List<GetAllPosts>> groupedByCategory = {};
+  HomeStateNotifier? homeStateNotifier;
+  HomeState? homeState;
+  UserModel? userModel;
 
   @override
   void initState() {
     super.initState();
+
     _tabController = TabController(length: 2, vsync: this);
-    profileStateNotifier = ref.read(profileStateNotifierProvider.notifier);
-    createPostState = ref.read(profileStateNotifierProvider);
+    /*profileStateNotifier = ref.read(profileStateNotifierProvider.notifier);
+    createPostState = ref.watch(profileStateNotifierProvider);*/
 
     WidgetsBinding.instance.addPostFrameCallback(
       (timeStamp) {
@@ -41,9 +47,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   Future<void> _getAllPostByUser() async {
     final userId = SharedPreferenceHelper.getString(AppStrings.userID);
-    getAllPostByUser = await profileStateNotifier?.getAllPostsByUser(userId);
-    groupedByCategory = profileStateNotifier?.groupPostsByCategory(getAllPostByUser) ?? {};
-    setState(() {});
+    await profileStateNotifier?.getAllPostsByUser(userId);
+    /*profileStateNotifier?.groupPostsByCategory() ?? {};*/
+    /*setState(() {});*/
   }
 
   @override
@@ -54,6 +60,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   @override
   Widget build(BuildContext context) {
+    final userModel = ref.read(homeStateNotifierProvider).userModel;
+    homeStateNotifier = ref.watch(homeStateNotifierProvider.notifier);
+    homeState = ref.watch(homeStateNotifierProvider);
+    profileStateNotifier = ref.watch(profileStateNotifierProvider.notifier);
+    createPostState = ref.watch(profileStateNotifierProvider);
+
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       appBar: const BackArrowAppBar(
@@ -72,7 +84,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   radius: 30,
                   backgroundColor: AppColors.primary,
                   child: Text(
-                    'J',
+                    userModel?.userName.substring(0, 1) ?? '',
                     style: AppStyles.getBoldStyle(
                       fontSize: 25,
                       color: AppColors.white,
@@ -84,7 +96,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'John Doe',
+                      userModel?.userName ?? '',
                       style: AppStyles.getBoldStyle(
                         fontSize: 18,
                         color: AppColors.primaryText,
@@ -92,7 +104,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                     ),
                     AppConst.gap4,
                     Text(
-                      'john.doe@example.com',
+                      userModel?.email ?? '',
                       style: AppStyles.getRegularStyle(
                         fontSize: 14,
                         color: AppColors.secondaryText,
@@ -142,7 +154,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         crossAxisSpacing: 4,
         mainAxisSpacing: 4,
       ),
-      itemCount: getAllPostByUser?.length ?? 0,
+      itemCount: createPostState?.getAllPostByUser.length ?? 0,
       itemBuilder: (context, index) {
         return _buildGridItem(index);
       },
@@ -153,9 +165,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     return Container(
       color: Colors.grey[300],
       child: ColoredBox(
-        color: index.isEven
-            ? AppColors.primary.withValues(alpha: 0.7)
-            : AppColors.primary.withValues(alpha: 0.5),
+        color: index.isEven ? AppColors.primary.withValues(alpha: 0.7) : AppColors.primary.withValues(alpha: 0.5),
         child: const Center(
           child: Icon(
             Icons.music_note,
@@ -170,24 +180,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   Widget _buildListTab() {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: AppConst.k16),
-      itemCount: groupedByCategory.keys.toList().length,
+      itemCount: createPostState?.getPostByCar.keys.toList().length,
       itemBuilder: (context, index) {
-        return _buildCategorySection(groupedByCategory.keys.toList()[index]);
+        return _buildCategorySection(createPostState?.getPostByCar.keys.toList()[index]);
       },
     );
   }
 
-  Widget _buildCategorySection(String title) {
-    final postByCategories = groupedByCategory[title] ?? [];
+  Widget _buildCategorySection(String? title) {
+    final postByCategories = createPostState?.getPostByCar[title] ?? [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(
-              horizontal: AppConst.k16, vertical: AppConst.k8),
+            horizontal: AppConst.k16,
+            vertical: AppConst.k8,
+          ),
           child: Text(
-            title,
+            title ?? '',
             style: AppStyles.getBoldStyle(
               fontSize: 18,
               color: AppColors.primaryText,
@@ -199,7 +211,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: AppConst.k8),
-            itemCount: postByCategories.length ?? 0,
+            itemCount: postByCategories.length,
             itemBuilder: (context, index) {
               return _buildHorizontalListItem(index);
             },
@@ -215,9 +227,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       width: 120,
       margin: const EdgeInsets.symmetric(horizontal: AppConst.k8),
       decoration: BoxDecoration(
-        color: index.isEven
-            ? AppColors.primary.withValues(alpha: 0.7)
-            : AppColors.primary.withValues(alpha: 0.5),
+        color: index.isEven ? AppColors.primary.withValues(alpha: 0.7) : AppColors.primary.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(AppConst.k8),
       ),
       child: Column(

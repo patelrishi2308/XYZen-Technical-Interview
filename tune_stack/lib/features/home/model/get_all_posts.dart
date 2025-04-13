@@ -8,6 +8,9 @@ class GetAllPosts {
     this.postId,
     this.category,
     this.userId,
+    this.isLiked,
+    this.likeCount,
+    this.commentCount,
   });
 
   GetAllPosts.fromJson(Map<String, dynamic> json) {
@@ -19,6 +22,15 @@ class GetAllPosts {
     postId = json['postId'].toString();
     category = json['category'].toString();
     userId = json['userId'].toString();
+    likeCount =
+        (json['likeCount'] != null && json['likeCount'].toString() != 'null' && json['likeCount'].toString().isNotEmpty)
+            ? int.parse(json['likeCount'].toString())
+            : 0;
+    commentCount = (json['commentCount'] != null &&
+            json['commentCount'].toString() != 'null' &&
+            json['commentCount'].toString().isNotEmpty)
+        ? int.parse(json['commentCount'].toString())
+        : 0;
   }
 
   String? createdAt;
@@ -29,9 +41,12 @@ class GetAllPosts {
   String? postId;
   String? category;
   String? userId;
+  bool? isLiked;
+  int? likeCount;
+  int? commentCount;
 
-  Map<String, String?> toJson() {
-    final data = <String, String?>{};
+  Map<String, dynamic> toJson() {
+    final data = <String, dynamic>{};
     data['createdAt'] = createdAt;
     data['audioUrl'] = audioUrl;
     data['coverImageUrl'] = coverImageUrl;
@@ -40,6 +55,8 @@ class GetAllPosts {
     data['postId'] = postId;
     data['category'] = category;
     data['userId'] = userId;
+    data['likeCount'] = likeCount;
+    data['commentCount'] = commentCount;
     return data;
   }
 }

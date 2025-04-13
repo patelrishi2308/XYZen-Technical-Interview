@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tune_stack/config/assets/colors.gen.dart';
 import 'package:tune_stack/constants/app_dimensions.dart';
 import 'package:tune_stack/constants/app_styles.dart';
+import 'package:tune_stack/features/home/model/get_all_posts.dart';
 import 'package:tune_stack/widgets/common_container_widget.dart';
 
 class TuneStackListItem extends StatelessWidget {
@@ -15,10 +16,14 @@ class TuneStackListItem extends StatelessWidget {
     required this.timeAgo,
     required this.onLikeTap,
     required this.onCommentTap,
+    required this.onViewAllComment,
     required this.onProfileTap,
     required this.onShareTap,
+    required this.getAllPosts,
+    this.onTap,
     super.key,
   });
+
   final String posterName;
   final String category;
   final String imageUrl;
@@ -26,10 +31,13 @@ class TuneStackListItem extends StatelessWidget {
   final int commentCount;
   final String description;
   final String timeAgo;
+  final GetAllPosts getAllPosts;
   final VoidCallback onLikeTap;
   final VoidCallback onCommentTap;
+  final VoidCallback onViewAllComment;
   final VoidCallback onProfileTap;
   final VoidCallback onShareTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -94,13 +102,6 @@ class TuneStackListItem extends StatelessWidget {
               ],
             ),
           ),
-          // More options button
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
         ],
       ),
     );
@@ -109,11 +110,14 @@ class TuneStackListItem extends StatelessWidget {
   Widget _buildImageContent() {
     return AspectRatio(
       aspectRatio: 1,
-      child: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage(imageUrl),
-            fit: BoxFit.cover,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: NetworkImage(imageUrl),
+              fit: BoxFit.cover,
+            ),
           ),
         ),
       ),
@@ -128,7 +132,13 @@ class TuneStackListItem extends StatelessWidget {
           // Like button
           InkWell(
             onTap: onLikeTap,
-            child: const Icon(Icons.favorite_border, size: 24),
+            child: (getAllPosts.isLiked ?? false)
+                ? const Icon(
+                    Icons.favorite,
+                    size: 24,
+                    color: Colors.red,
+                  )
+                : const Icon(Icons.favorite_border, size: 24),
           ),
           AppConst.gap16,
           // Comment button
@@ -177,9 +187,9 @@ class TuneStackListItem extends StatelessWidget {
           AppConst.gap4,
           // View all comments button
           InkWell(
-            onTap: onCommentTap,
+            onTap: onViewAllComment,
             child: Text(
-              'View all $commentCount comments',
+              'View all ${getAllPosts.commentCount} comments',
               style: AppStyles.getRegularStyle(
                 fontSize: 13,
                 color: Colors.grey,

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:master_utility/master_utility.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:tune_stack/config/assets/colors.gen.dart';
 import 'package:tune_stack/constants/app_dateformat.dart';
 import 'package:tune_stack/constants/app_dimensions.dart';
 import 'package:tune_stack/features/common/debouncer.dart';
 import 'package:tune_stack/features/home/controllers/home_state_notifier.dart';
+import 'package:tune_stack/features/home/views/music_player_screen.dart';
+import 'package:tune_stack/features/home/views/view_all_comment_screen.dart';
+import 'package:tune_stack/features/home/views/widgets/add_comment_bottom_sheet.dart';
 import 'package:tune_stack/features/home/views/widgets/list_item_widget.dart';
 import 'package:tune_stack/widgets/app_loading_place_holder.dart';
 import 'package:tune_stack/widgets/back_arrow_app_bar.dart';
@@ -36,6 +40,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final homeState = ref.watch(homeStateNotifierProvider);
+    final homeStateNotifier = ref.watch(homeStateNotifierProvider.notifier);
+
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       appBar: const BackArrowAppBar(
@@ -92,21 +98,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     category: post.category ?? '',
                                     imageUrl: post.coverImageUrl ?? '',
                                     // Placeholder for demo
-                                    likeCount: 120 + index,
+                                    likeCount: post.likeCount ?? 0,
                                     commentCount: 24 + index,
                                     description: post.description ?? '',
+                                    getAllPosts: post,
                                     timeAgo: AppDateFormat.getTimeAgo(int.parse(post.createdAt ?? '0')),
                                     onLikeTap: () {
-                                      // Handle like action
+                                      final getAllPosts = homeState.getAllPostsList[index];
+                                      homeStateNotifier.toggleLike(getAllPosts.postId, index);
                                     },
                                     onCommentTap: () {
-                                      // Handle comment action
+                                      homeStateNotifier.getAllComments(post.postId);
+                                      AddCommentBottomSheet.show(
+                                        postId: post.postId ?? '',
+                                        getAllPosts: post,
+                                        index: index,
+                                      );
+                                    },
+                                    onViewAllComment: () {
+                                      NavigationHelper.navigatePush(
+                                        route: ViewAllCommentScreen(postId: post.postId ?? ''),
+                                      );
                                     },
                                     onProfileTap: () {
                                       // Handle profile tap
                                     },
                                     onShareTap: () {
                                       // Handle share action
+                                    },
+                                    onTap: () {
+                                      NavigationHelper.navigatePush(
+                                        route: MusicPlayerScreen(
+                                          musicUrl: post.audioUrl ?? '',
+                                          title: post.category ?? 'Unknown Track',
+                                          artist: post.userId ?? 'Unknown Artist',
+                                          coverImageUrl: post.coverImageUrl ?? '',
+                                        ),
+                                      );
                                     },
                                   );
                                 },
