@@ -139,7 +139,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         await NavigationHelper.navigatePush(
                                           route: MusicPlayerScreen(
                                             musicUrl: post.audioUrl ?? '',
-                                            title: post.category ?? 'Unknown Track',
+                                            title: post.postTitle ?? 'Unknown Track',
                                             artist: post.userName ?? 'Unknown Artist',
                                             coverImageUrl: post.coverImageUrl ?? '',
                                           ),
