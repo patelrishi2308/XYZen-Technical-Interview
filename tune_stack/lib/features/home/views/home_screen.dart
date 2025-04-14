@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:master_utility/master_utility.dart';
@@ -5,6 +6,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:tune_stack/config/assets/colors.gen.dart';
 import 'package:tune_stack/constants/app_dateformat.dart';
 import 'package:tune_stack/constants/app_dimensions.dart';
+import 'package:tune_stack/features/auth/views/auth_screen.dart';
 import 'package:tune_stack/features/common/debouncer.dart';
 import 'package:tune_stack/features/home/controllers/home_state_notifier.dart';
 import 'package:tune_stack/features/home/views/music_player_screen.dart';
@@ -13,6 +15,7 @@ import 'package:tune_stack/features/home/views/view_all_comment_screen.dart';
 import 'package:tune_stack/features/home/views/widgets/add_comment_bottom_sheet.dart';
 import 'package:tune_stack/features/home/views/widgets/list_item_widget.dart';
 import 'package:tune_stack/features/profile/views/profile_screen.dart';
+import 'package:tune_stack/helpers/preference_helper.dart';
 import 'package:tune_stack/widgets/app_loading_place_holder.dart';
 import 'package:tune_stack/widgets/back_arrow_app_bar.dart';
 import 'package:tune_stack/widgets/no_data_found_widget.dart';
@@ -59,10 +62,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               );
             },
           ),
-          // const Padding(
-          //   padding: EdgeInsets.only(right: 12),
-          //   child: Icon(Icons.favorite_border),
-          // ),
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: GestureDetector(
+              onTap: () async {
+                await SharedPreferenceHelper.clear();
+                await FirebaseAuth.instance.signOut();
+                await NavigationHelper.navigatePushRemoveUntil(
+                  route: const AuthScreen(),
+                );
+              },
+              child: const Icon(Icons.logout),
+            ),
+          ),
+
         ],
       ),
       body: Padding(
@@ -150,7 +163,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       );
                                     },
                                     onShareTap: () {
-                                      // Handle share action
+                                      homeStateNotifier.shareText(index); // Handle share action
                                     },
                                     onTap: () async {
                                       if (post.fileType == 'Audio') {

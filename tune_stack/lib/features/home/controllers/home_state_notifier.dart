@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:tune_stack/config/custom_exception.dart';
 import 'package:tune_stack/constants/app_strings.dart';
 import 'package:tune_stack/features/common/user_model.dart';
@@ -191,5 +192,10 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
 
       state = state.copyWith(getAllPostsList: searchPostList);
     }
+  }
+  void shareText(int index) {
+    final getAllPosts = state.getAllPostsList[index];
+    String shareMessage = 'Check out this amazing ${getAllPosts.fileType} in TuneStack app:\n\n${getAllPosts.audioUrl}';
+    Share.share(shareMessage);
   }
 }

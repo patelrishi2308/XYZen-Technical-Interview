@@ -149,6 +149,11 @@ class TuneStackListItem extends StatelessWidget {
             onTap: onCommentTap,
             child: const Icon(Icons.chat_bubble_outline, size: 22),
           ),
+          AppConst.gap16,
+          InkWell(
+            onTap: onShareTap,
+            child: const Icon(Icons.share, size: 22),
+          ),
         ],
       ),
     );
