@@ -41,6 +41,7 @@ dependencies:
   path: ^1.9.0
   mime: ^2.0.0
   video_player: ^2.9.5
+  dart_openai: ^4.0.0  # For OpenAI API integration
 
 dev_dependencies:
   envied_generator: ^0.5.4+1

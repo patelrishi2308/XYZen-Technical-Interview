@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:master_utility/master_utility.dart';
 import 'package:toastification/toastification.dart';
 import 'package:tune_stack/features/splash/views/splash_screen.dart';
+
 // Project imports:]
 
 class TuneStackApp extends StatelessWidget {

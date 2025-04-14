@@ -17,6 +17,7 @@ import 'package:tune_stack/widgets/app_loading_place_holder.dart';
 import 'package:tune_stack/widgets/back_arrow_app_bar.dart';
 import 'package:tune_stack/widgets/no_data_found_widget.dart';
 import 'package:tune_stack/widgets/search_field_with_filter_widget.dart';
+import 'package:tune_stack/features/chatbot/views/chatbot_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -45,15 +46,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final homeStateNotifier = ref.watch(homeStateNotifierProvider.notifier);
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
-      appBar: const BackArrowAppBar(
+      appBar: BackArrowAppBar(
         title: 'TuneStack',
         centerTitle: false,
         backArrowEnable: false,
         actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: Icon(Icons.favorite_border),
+          IconButton(
+            icon: const Icon(Icons.chat_bubble_outline),
+            onPressed: () {
+              NavigationHelper.navigatePush(
+                route: const ChatbotScreen(),
+              );
+            },
           ),
+          // const Padding(
+          //   padding: EdgeInsets.only(right: 12),
+          //   child: Icon(Icons.favorite_border),
+          // ),
         ],
       ),
       body: Padding(
@@ -91,9 +100,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           children: [
                             Expanded(
                               child: ListView.separated(
-                                key: const PageStorageKey<String>('home_post_list'),
-                                separatorBuilder: (context, index) => AppConst.gap12,
-                                padding: const EdgeInsets.only(bottom: AppConst.k16),
+                                key: const PageStorageKey<String>(
+                                    'home_post_list'),
+                                separatorBuilder: (context, index) =>
+                                    AppConst.gap12,
+                                padding:
+                                    const EdgeInsets.only(bottom: AppConst.k16),
                                 itemCount: homeState.getAllPostsList.length,
                                 itemBuilder: (context, index) {
                                   final post = homeState.getAllPostsList[index];
@@ -106,13 +118,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     commentCount: 24 + index,
                                     description: post.description ?? '',
                                     getAllPosts: post,
-                                    timeAgo: AppDateFormat.getTimeAgo(int.parse(post.createdAt ?? '0')),
+                                    timeAgo: AppDateFormat.getTimeAgo(
+                                        int.parse(post.createdAt ?? '0')),
                                     onLikeTap: () {
-                                      final getAllPosts = homeState.getAllPostsList[index];
-                                      homeStateNotifier.toggleLike(getAllPosts.postId, index);
+                                      final getAllPosts =
+                                          homeState.getAllPostsList[index];
+                                      homeStateNotifier.toggleLike(
+                                          getAllPosts.postId, index);
                                     },
                                     onCommentTap: () {
-                                      homeStateNotifier.getAllComments(post.postId, showLoader: false);
+                                      homeStateNotifier.getAllComments(
+                                          post.postId,
+                                          showLoader: false);
                                       AddCommentBottomSheet.show(
                                         postId: post.postId ?? '',
                                         getAllPosts: post,
@@ -121,7 +138,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     },
                                     onViewAllComment: () {
                                       NavigationHelper.navigatePush(
-                                        route: ViewAllCommentScreen(postId: post.postId ?? ''),
+                                        route: ViewAllCommentScreen(
+                                            postId: post.postId ?? ''),
                                       );
                                     },
                                     onProfileTap: () {
@@ -139,9 +157,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         await NavigationHelper.navigatePush(
                                           route: MusicPlayerScreen(
                                             musicUrl: post.audioUrl ?? '',
-                                            title: post.postTitle ?? 'Unknown Track',
-                                            artist: post.userName ?? 'Unknown Artist',
-                                            coverImageUrl: post.coverImageUrl ?? '',
+                                            title: post.postTitle ??
+                                                'Unknown Track',
+                                            artist: post.userName ??
+                                                'Unknown Artist',
+                                            coverImageUrl:
+                                                post.coverImageUrl ?? '',
                                           ),
                                         );
                                       } else {
